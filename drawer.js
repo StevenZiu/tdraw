@@ -1,6 +1,6 @@
 const chalk = require("chalk")
 
-// init drawer
+// drawer constructor
 const Drawer = function () {
   this.canvas = null
   this.width = null
@@ -8,6 +8,7 @@ const Drawer = function () {
   this.init = false
 }
 
+// Command listener
 Drawer.prototype.onCommand = function (command) {
   let _command = this.processCommand(command)
   if (this.isValidCommand(_command)) {
@@ -20,8 +21,10 @@ Drawer.prototype.onCommand = function (command) {
         this.drawLine(_command[1], _command[2], _command[3], _command[4])
         break
       case "R":
-        console.log(_command)
         this.drawRect(_command[1], _command[2], _command[3], _command[4])
+        break
+      case "B":
+        this.fill(_command[1], _command[2], _command[3])
         break
       case "X":
         this.reset()
@@ -33,22 +36,28 @@ Drawer.prototype.onCommand = function (command) {
   }
 }
 
+// Command pre-processor
 Drawer.prototype.processCommand = function (command) {
   const _command = command.split(" ")
   const result = []
   result.push(command[0])
   for (let i = 1; i < _command.length; i++) {
-    result.push(parseInt(_command[i]))
+    if (!isNaN(_command[i])) {
+      result.push(parseInt(_command[i]))
+    } else {
+      result.push(_command[i])
+    }
   }
   return result
 }
 
+// validate command parameters
 Drawer.prototype.isValidCommand = function (command) {
   switch (command[0]) {
     case "C":
       if (
-        Number.isFinite(command[1]) &&
-        Number.isFinite(command[2]) &&
+        !isNaN(command[1]) &&
+        !isNaN(command[2]) &&
         command[1] < 50 &&
         command[2] < 50
       ) {
@@ -56,7 +65,7 @@ Drawer.prototype.isValidCommand = function (command) {
       } else {
         this.log(
           "warning",
-          "The width and height should not be larger than 500*500"
+          "The width and height should be number and smaller than 50*50"
         )
         return false
       }
@@ -65,6 +74,15 @@ Drawer.prototype.isValidCommand = function (command) {
     case "L":
       if (!this.init) {
         this.log("warning", "Please init canvas first by using command C w h.")
+        return false
+      }
+      if (
+        isNaN(command[1]) ||
+        isNaN(command[2]) ||
+        isNaN(command[3]) ||
+        isNaN(command[4])
+      ) {
+        this.log("warning", "please input both start and end coords")
         return false
       }
       if (command[1] !== command[3] && command[2] !== command[4]) {
@@ -88,6 +106,18 @@ Drawer.prototype.isValidCommand = function (command) {
         return false
       }
       if (
+        isNaN(command[1]) ||
+        isNaN(command[2]) ||
+        isNaN(command[3]) ||
+        isNaN(command[4])
+      ) {
+        this.log(
+          "warning",
+          "please input both upper left and lower right coords"
+        )
+        return false
+      }
+      if (
         this.outsideCanvas(command[1], command[2]) ||
         this.outsideCanvas(command[3], command[4])
       ) {
@@ -102,13 +132,27 @@ Drawer.prototype.isValidCommand = function (command) {
         return false
       }
       return true
+    case "B":
+      if (!this.init) {
+        this.log("warning", "Please init canvas first by using command C w h.")
+        return false
+      }
+      if (isNaN(command[1]) || isNaN(command[2])) {
+        this.log("warning", "please input starting coords")
+        return false
+      }
+      if (this.outsideCanvas(command[1], command[2])) {
+        this.log("warning", "The point is at the outside of canvas.")
+        return false
+      }
+      return true
     default:
       return false
   }
 }
 
+// check if some coords outside the canvas
 Drawer.prototype.outsideCanvas = function (x, y) {
-  console.log(x, y)
   if (x <= 0 || x > this.width || y <= 0 || y > this.height) {
     return true
   } else {
@@ -116,6 +160,7 @@ Drawer.prototype.outsideCanvas = function (x, y) {
   }
 }
 
+// init canvas
 Drawer.prototype.initCanvas = function (width, height) {
   if (this.init) {
     this.log("warning", "Canvas already exist. Type X to clear current canvas")
@@ -142,7 +187,9 @@ Drawer.prototype.initCanvas = function (width, height) {
   }
 }
 
+// draw line
 Drawer.prototype.drawLine = function (x1, y1, x2, y2, showResult = true) {
+  // The line could have different direction, we swap them there to make sure the direction always positive
   let _x1, _x2, _y1, _y2
   if (x1 > x2) {
     _x1 = x2
@@ -166,6 +213,7 @@ Drawer.prototype.drawLine = function (x1, y1, x2, y2, showResult = true) {
   if (showResult) this.showCanvas()
 }
 
+// draw rect
 Drawer.prototype.drawRect = function (x1, y1, x2, y2) {
   this.drawLine(x1, y1, x2, y1, false)
   this.drawLine(x1, y1, x1, y2, false)
@@ -174,6 +222,25 @@ Drawer.prototype.drawRect = function (x1, y1, x2, y2) {
   this.showCanvas()
 }
 
+// bucket fill
+Drawer.prototype.fill = function (x, y, char = "o") {
+  // recursive helper, ultra fast
+  const recursiveFill = (canvas, x, y, char) => {
+    // if there is already has some filled, we skip
+    if (this.canvas[y][x] !== " ") {
+      return
+    }
+    this.canvas[y][x] = char
+    recursiveFill(this.canvas, x + 1, y, char)
+    recursiveFill(this.canvas, x - 1, y, char)
+    recursiveFill(this.canvas, x, y + 1, char)
+    recursiveFill(this.canvas, x, y - 1, char)
+  }
+  recursiveFill(this.canvas, x, y, char)
+  this.showCanvas()
+}
+
+// reset the whole canvas
 Drawer.prototype.reset = function () {
   this.init = false
   this.canvas = []
@@ -182,10 +249,12 @@ Drawer.prototype.reset = function () {
   this.log("success", "Canvas has been cleaned.")
 }
 
+// display current canvas
 Drawer.prototype.showCanvas = function () {
   console.log(this.canvas.map((row) => row.join(" ")).join("\n"))
 }
 
+// logger
 Drawer.prototype.log = function (type, msg) {
   switch (type) {
     case "warning":

@@ -4,7 +4,7 @@ const chalkTable = require("chalk-table")
 const commandHelperTableOptions = {
   leftPad: 2,
   columns: [
-    { field: "command", name: chalk.magenta("Command") },
+    { field: "command", name: chalk.green("Command") },
     { field: "desc", name: chalk.green("Description") },
   ],
 }
@@ -27,8 +27,12 @@ const commandHelperTable = chalkTable(commandHelperTableOptions, [
     desc: "Fill the entire area connected to (x,y) with 'colour' c. ",
   },
   {
+    command: "X",
+    desc: "Reset current canvas.",
+  },
+  {
     command: "Q",
-    desc: "Quit the program",
+    desc: "Quit the program.",
   },
 ])
 

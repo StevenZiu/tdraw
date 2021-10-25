@@ -6,11 +6,11 @@ const rl = readline.createInterface(process.stdin, process.stdout)
 const D = new Drawer()
 
 console.log(
-  chalk.green(
-    "Welcome to terminal canvas, for full command tools, type -h quit app type Q"
+  chalk.magenta(
+    "Welcome to terminal canvas, for full command helper, type -h, quit app type Q."
   )
 )
-
+console.log(commandHelperTable)
 // listener
 rl.on("line", function (line) {
   if (line === "-h") {
