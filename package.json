@@ -1,5 +1,5 @@
 {
-  "name": "tdraw",
+  "name": "terminal-draw",
   "version": "1.0.0",
   "description": "Command line based drawing tool for terminal",
   "main": "index.js",
