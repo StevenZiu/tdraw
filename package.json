@@ -4,7 +4,7 @@
   "description": "Command line based drawing tool for terminal",
   "main": "index.js",
   "scripts": {
-    "test": "npm test",
+    "test": "jest",
     "start": "nodemon"
   },
   "keywords": [
@@ -18,5 +18,7 @@
   },
   "author": "stevenzhao",
   "license": "ISC",
-  "devDependencies": {}
+  "devDependencies": {
+    "jest": "^27.3.1"
+  }
 }
