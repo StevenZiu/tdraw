@@ -1,0 +1,22 @@
+{
+  "name": "tdraw",
+  "version": "1.0.0",
+  "description": "Command line based drawing tool for terminal",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test",
+    "start": "nodemon"
+  },
+  "keywords": [
+    "Drawing",
+    "Terminal",
+    "Nodejs"
+  ],
+  "dependencies": {
+    "chalk": "4.1.2",
+    "chalk-table": "^1.0.2"
+  },
+  "author": "stevenzhao",
+  "license": "ISC",
+  "devDependencies": {}
+}
